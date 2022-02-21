@@ -1,4 +1,5 @@
 import os
+from xml.dom.minidom import Element
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -9,13 +10,27 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 ### GAME STUFF ###
+
+#Lists for indiv balances
+
+
+
+
+def findUserIndex(userID):
+    try:
+        index = users.index(userID)
+        return index
+    except:
+        return None
+
 ## MONEY ##
 
-money = 0
-workMoney = 100
-promotionBonus = 50
-timeUntilPromotion = 0
-timeRequiredPromotion = 10
+users = []
+balances = []
+workMoney = []
+promoBonus = []
+timeUntilPromo = []
+timeRequiredPromo = []
 
 ## COMBAT
 
@@ -51,16 +66,25 @@ async def on_ready():
 
 @bot.command(name='work', help= '- Work for some money!')
 async def work(ctx):
-    
-    global money
-    global workMoney
-    global promotionBonus
-    global timeUntilPromotion
-    global timeRequiredPromotion
 
-    if (timeUntilPromotion >= timeRequiredPromotion):
-        promotedWorkMoney = workMoney + promotionBonus
-        workMoney = workMoney + promotionBonus
+    
+    userIndex = findUserIndex(ctx.author)
+    if(userIndex == None):
+        users.append(ctx.author)
+        balances.append(0)
+        workMoney.append(100)
+        promoBonus.append(100)
+        timeRequiredPromo.append(10)
+        timeUntilPromo.append(0)
+        userIndex = 0
+
+    balances[userIndex] = balances[userIndex] + 100
+
+    print(userIndex)
+
+    if (timeUntilPromotion >= timeRequiredPromo):
+        promotedWorkMoney = workMoney + promoBonus
+        workMoney = workMoney + promoBonus
         timeUntilPromotion = 0 
         
         await ctx.send('You got promoted! Your new salary is ' + str(promotedWorkMoney) + ' per hour')
