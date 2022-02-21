@@ -27,7 +27,7 @@ def findUserIndex(userID):
 
 users = []
 balances = []
-workMoney = []
+workMoneys = []
 promoBonus = []
 timeUntilPromo = []
 timeRequiredPromo = []
@@ -47,6 +47,11 @@ inventory = []
 
 
 ### BOT STUFF ###
+
+#find the author's list number
+
+
+
 #bot prefix
 
 bot = commands.Bot(command_prefix=',')
@@ -72,35 +77,41 @@ async def work(ctx):
     if(userIndex == None):
         users.append(ctx.author)
         balances.append(0)
-        workMoney.append(100)
+        workMoneys.append(100)
         promoBonus.append(100)
         timeRequiredPromo.append(10)
         timeUntilPromo.append(0)
         userIndex = 0
 
-    balances[userIndex] = balances[userIndex] + 100
+
 
     print(userIndex)
 
-    if (timeUntilPromotion >= timeRequiredPromo):
-        promotedWorkMoney = workMoney + promoBonus
-        workMoney = workMoney + promoBonus
-        timeUntilPromotion = 0 
+    if (timeUntilPromo >= timeRequiredPromo):
+        promotedWorkMoney = workMoneys[userIndex] + promoBonus[userIndex]
+        workMoneys[userIndex] = workMoneys[userIndex] + promoBonus[userIndex]
+        timeUntilPromo[userIndex] = 0 
         
         await ctx.send('You got promoted! Your new salary is ' + str(promotedWorkMoney) + ' per hour')
-        await ctx.send('You worked for an hour and got ' + str(workMoney))
-        money = money + workMoney
+        await ctx.send('You worked for an hour and got ' + str(workMoneys[userIndex]) + 'dollars')
     else:
-        timeUntilPromotion = timeUntilPromotion + 1
-        money = money + workMoney
-        await ctx.send('You worked for an hour and got ' + str(workMoney))
+        timeUntilPromo[userIndex] = timeUntilPromo[userIndex] + 1
+        balances[userIndex] = balances[userIndex] + workMoneys[userIndex]
+        await ctx.send('You worked for an hour and got ' + str(workMoneys[userIndex]) + 'dollars')
 
 #balance command
 @bot.command(name='bal', help= '- Shows your current balance')
 async def bal(ctx):
-    global money
 
-    await ctx.send("You have " + str(money) + ' dollars')
+    userIndex = findUserIndex(ctx.author)
+
+    if (userIndex == None):
+        bal = 0
+    else:
+        bal = balances[userIndex]
+
+
+    await ctx.send("You have " + str(bal) + ' dollars')
         
     
 
