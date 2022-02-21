@@ -12,25 +12,26 @@ GUILD = os.getenv('DISCORD_GUILD')
 ### GAME STUFF ###
 
 #Lists for indiv balances
+#users(userID, balance, workMoney, promoBonus, timeRequiredPromo, timeUntilPromo)
 
+userID = 0
+balance = 1
+workMoney = 2
+promoBonus = 3
+timeRequiredPromo = 4
+timeUntilPromo = 5
 
+users = []
 
 
 def findUserIndex(userID):
-    try:
-        index = users.index(userID)
-        return index
-    except:
-        return None
+    index = 0
+    for user in users:
+        if (user[index] == userID):
+            return index
+    return None
+            
 
-## MONEY ##
-
-users = []
-balances = []
-workMoneys = []
-promoBonus = []
-timeUntilPromo = []
-timeRequiredPromo = []
 
 ## COMBAT
 
@@ -75,29 +76,25 @@ async def work(ctx):
     
     userIndex = findUserIndex(ctx.author)
     if(userIndex == None):
-        users.append(ctx.author)
-        balances.append(0)
-        workMoneys.append(100)
-        promoBonus.append(100)
-        timeRequiredPromo.append(10)
-        timeUntilPromo.append(0)
+        users.append((ctx.author, 0, 100, 10, 0))
         userIndex = 0
 
 
 
     print(userIndex)
 
-    if (timeUntilPromo >= timeRequiredPromo):
-        promotedWorkMoney = workMoneys[userIndex] + promoBonus[userIndex]
-        workMoneys[userIndex] = workMoneys[userIndex] + promoBonus[userIndex]
-        timeUntilPromo[userIndex] = 0 
+    if (users[userIndex][timeUntilPromo] == users[userIndex][timeRequiredPromo]):
+        promotedWorkMoney = users[userIndex][workMoney] + users[userIndex][promoBonus]
+        users[userIndex][workMoney] = users[userIndex][workMoney] + users[userIndex][promoBonus]
+        users[userIndex][balance] = users[userIndex][balance] + users[userIndex][workMoney]
+        users[userIndex][timeUntilPromo] = 0 
         
         await ctx.send('You got promoted! Your new salary is ' + str(promotedWorkMoney) + ' per hour')
-        await ctx.send('You worked for an hour and got ' + str(workMoneys[userIndex]) + 'dollars')
+        await ctx.send('You worked for an hour and got ' + str(users[userIndex][workMoney]) + ' dollars')
     else:
         timeUntilPromo[userIndex] = timeUntilPromo[userIndex] + 1
-        balances[userIndex] = balances[userIndex] + workMoneys[userIndex]
-        await ctx.send('You worked for an hour and got ' + str(workMoneys[userIndex]) + 'dollars')
+        users[userIndex][balance] = users[userIndex][1] + users[userIndex][2]
+        await ctx.send('You worked for an hour and got ' + str(users[userIndex][3]) + 'dollars')
 
 #balance command
 @bot.command(name='bal', help= '- Shows your current balance')
@@ -108,7 +105,7 @@ async def bal(ctx):
     if (userIndex == None):
         bal = 0
     else:
-        bal = balances[userIndex]
+        bal = users[userIndex][1]
 
 
     await ctx.send("You have " + str(bal) + ' dollars')
