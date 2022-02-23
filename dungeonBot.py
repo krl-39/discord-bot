@@ -3,6 +3,7 @@ from xml.dom.minidom import Element
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+from userData import User
 
 #get token + guild name
 load_dotenv()
@@ -24,34 +25,20 @@ GUILD = os.getenv('DISCORD_GUILD')
 users = []
 
 
-def findUserIndex(userID):
-    index = 0
+def findUser(userID):
     for user in users:
-        if (user[index] == userID):
-            return index
+        if (user.userID == userID):
+            return user
     return None
             
 
 
 ## COMBAT
-
-maxHealth = 100
-currentHealth = 100
-maxMana = 100
-currentHealth = 100
-inventory = []
-
-
-
-
-
-
+mobs = []
+# mob name = ['mob name' , health , damage , defense , mob type] add true damage?
+zombie = ['zombie' , 150 , 50, 0, 'undead']
 
 ### BOT STUFF ###
-
-#find the author's list number
-
-
 
 #bot prefix
 
@@ -75,53 +62,37 @@ async def work(ctx):
 
     #userList = list(users)
 
-    
-    userIndex = findUserIndex(ctx.author)
-    if(userIndex == None):
-        users.append((ctx.author, 0, 100, 100, 10, 0))
-        userIndex = 0
-
-
-
-    print(userIndex)
-
-    (userID, balance, workMoney, promoBonus, timeRequiredPromo, timeUntilPromo) = users[userIndex]
-
-
-    if (timeUntilPromo == timeRequiredPromo):
-        promotedWorkMoney = workMoney + promoBonus
-        workMoney = promotedWorkMoney
-        balance = balance + workMoney
-        timeUntilPromo = 0 
-        users[userIndex] = (userID, balance, workMoney, promoBonus, timeRequiredPromo, timeUntilPromo)
+    user = findUser(ctx.author)
+    if(user == None):
+        user = User(ctx.author, 0, 100, 100, 10, 0)
+        users.append(user)
+      
+   
+    if (user.timeUntilPromo == user.timeRequiredPromo):
+        promotedWorkMoney = user.workMoney + user.promoBonus
+        user.workMoney = promotedWorkMoney
+        user.balance = user.balance + user.workMoney
+        user.timeUntilPromo = 0 
         await ctx.send('You got promoted! Your new salary is ' + str(promotedWorkMoney) + ' per hour')
-        await ctx.send('You worked for an hour and got ' + str(workMoney) + ' dollars')
+        await ctx.send('You worked for an hour and got ' + str(user.workMoney) + ' dollars')
   
     else:
-        timeUntilPromo = timeUntilPromo + 1
-        balance = balance + workMoney
-        users[userIndex] = (userID, balance, workMoney, promoBonus, timeRequiredPromo, timeUntilPromo)
-        await ctx.send('You worked for an hour and got ' + str(workMoney) + ' dollars')
-
-    
+        user.timeUntilPromo = user.timeUntilPromo + 1
+        user.balance = user.balance + user.workMoney
+        await ctx.send('You worked for an hour and got ' + str(user.workMoney) + ' dollars')
 
 #balance command
 @bot.command(name='bal', help= '- Shows your current balance')
 async def bal(ctx):
 
-    userIndex = findUserIndex(ctx.author)
+    user = findUser(ctx.author)
 
-    if (userIndex == None):
+    if (user == None):
         bal = 0
     else:
-        bal = users[userIndex][1]
-
+        bal = user.balance
 
     await ctx.send("You have " + str(bal) + ' dollars')
         
     
-
-
-
-
 bot.run(TOKEN)
